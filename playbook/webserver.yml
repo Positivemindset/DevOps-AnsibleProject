@@ -20,12 +20,15 @@
     php_modules: [ 'php-curl', 'php-gd', 'php-mbstring', 'php-xml', 'php-xmlrpc', 'php-soap', 'php-intl', 'php-zip' ]
 
   tasks:
+    - name: Install prerequisites
+      apt: name=aptitude update_cache=yes state=latest force_apt_get=yes
+    
     - name: Apache, PHP and MySQL must be installed
       apt:
         update_cache: yes
         name: "{{item}}"
         state: latest
-      loop: ['apache2','php-mysql','libapache2-mod-php','python-mysqldb','python3-pymysql','mysql-server']
+      loop: ['apache2','mysql-server','python3-pymysql', 'php', 'php-mysql', 'libapache2-mod-php','python-setuptools','python-dev','build-essential']
     
     - name: Install PHP Extensions
       apt: 
@@ -40,9 +43,17 @@
         state: directory
         owner: "www-data"
         group: "www-data" 
-
+ 
+    - name: Add skip-grant-tables
+      blockinfile:
+        path: /etc/mysql/my.cnf
+        block: |
+          [mysqld]
+          skip-grant-tables 
+    
     - name: Setting the root password
       mysql_user:
+        host: localhost
         name: root
         password: "{{mysql_root_password}}"
         update_password: always
