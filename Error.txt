@@ -1,22 +1,40 @@
-ansible@ip-172-31-57-130:~/.ansible/DevOps-AnsibleProject1$ ansible-playbook playbook/webserver.yml  
-PLAY [webserver] ***********************************************************************************
+ansible@ip-172-31-57-130:~/.ansible/DevOps-AnsibleProject1$ ansible-playbook playbook/webserver.yml 
 
-TASK [Gathering Facts] *****************************************************************************
+PLAY [webserver] ***************************************************************************************************************************
+
+TASK [Gathering Facts] *********************************************************************************************************************
+[DEPRECATION WARNING]: Distribution Ubuntu 18.04 on host 172.31.49.89 should use /usr/bin/python3, but is using /usr/bin/python for 
+backward compatibility with prior Ansible releases. A future Ansible release will default to using the discovered platform python for this 
+host. See https://docs.ansible.com/ansible/2.9/reference_appendices/interpreter_discovery.html for more information. This feature will be 
+removed in version 2.12. Deprecation warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
 ok: [172.31.49.89]
 
-TASK [Apache, PHP and MySQL must be installed] *****************************************************
-ok: [172.31.49.89] => (item=apache2)
-ok: [172.31.49.89] => (item=php-mysql)
-ok: [172.31.49.89] => (item=libapache2-mod-php)
-ok: [172.31.49.89] => (item=python3-pymysql)
-ok: [172.31.49.89] => (item=mysql-server)
+TASK [Apache, PHP and MySQL must be installed] *********************************************************************************************
+changed: [172.31.49.89] => (item=apache2)
+changed: [172.31.49.89] => (item=php-mysql)
+changed: [172.31.49.89] => (item=libapache2-mod-php)
+changed: [172.31.49.89] => (item=python-mysqldb)
+changed: [172.31.49.89] => (item=python3-pymysql)
+changed: [172.31.49.89] => (item=mysql-server)
 
-TASK [Create the website root directory] ***********************************************************
+TASK [Install PHP Extensions] **************************************************************************************************************
+changed: [172.31.49.89] => (item=php-curl)
+changed: [172.31.49.89] => (item=php-gd)
+changed: [172.31.49.89] => (item=php-mbstring)
+changed: [172.31.49.89] => (item=php-xml)
+changed: [172.31.49.89] => (item=php-xmlrpc)
+changed: [172.31.49.89] => (item=php-soap)
+changed: [172.31.49.89] => (item=php-intl)
+changed: [172.31.49.89] => (item=php-zip)
+
+TASK [Create the website root directory] ***************************************************************************************************
 ok: [172.31.49.89]
 
-TASK [Setting the root password] *******************************************************************
+TASK [Setting the root password] ***********************************************************************************************************
 [WARNING]: Module did not set no_log for update_password
 fatal: [172.31.49.89]: FAILED! => {"changed": false, "msg": "unable to connect to database, check login_user and login_password are correct or /root/.my.cnf has the credentials. Exception message: (1045, \"Access denied for user 'root'@'localhost' (using password: NO)\")"}
 
-PLAY RECAP *****************************************************************************************
-172.31.49.89               : ok=3    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0  
+PLAY RECAP *********************************************************************************************************************************
+172.31.49.89               : ok=4    changed=2    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+
+ansible@ip-172-31-57-130:~/.ansible/DevOps-AnsibleProject1$ 
