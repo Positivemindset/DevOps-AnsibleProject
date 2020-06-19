@@ -17,6 +17,7 @@
     mysql_db: wpdb
     mysql_user: wpuser
     mysql_password: harsha123
+    php_modules: [ 'php-curl', 'php-gd', 'php-mbstring', 'php-xml', 'php-xmlrpc', 'php-soap', 'php-intl', 'php-zip' ]
 
   tasks:
     - name: Apache, PHP and MySQL must be installed
@@ -24,11 +25,18 @@
         update_cache: yes
         name: "{{item}}"
         state: latest
-      loop: ['apache2','php-mysql','libapache2-mod-php','python3-pymysql','mysql-server']
+      loop: ['apache2','php-mysql','libapache2-mod-php','python-mysqldb','python3-pymysql','mysql-server']
+    
+    - name: Install PHP Extensions
+      apt: 
+        name: "{{ item }}"
+        update_cache: yes
+        state: latest
+      loop: "{{ php_modules }}"
 
     - name: Create the website root directory
       file:
-        path: "/var/www/{{ http_host }}"
+        path: "/var/www/{{http_host}}"
         state: directory
         owner: "www-data"
         group: "www-data" 
@@ -36,64 +44,64 @@
     - name: Setting the root password
       mysql_user:
         name: root
-        password: "{{ mysql_root_password }}"
+        password: "{{mysql_root_password}}"
         update_password: always
         check_implicit_admin: true
         state: present
         login_unix_socket: /var/run/mysqld/mysqld.sock
-
+    
     - name: Create wordpress database
       mysql_db:
-        name: "{{ mysql_db }}"
+        name: "{{mysql_db}}"
         state: present
         login_user: root
-        login_password: "{{ mysql_root_password }}"
+        login_password: "{{mysql_root_password}}"
 
     - name: Create MySQL user 
       mysql_user:
-        name: "{{ mysql_user }}"
-        password: "{{ mysql_password }}"
-        priv: "{{ mysql_db }}.*:ALL"
+        name: "{{ mysql_user}}"
+        password: "{{mysql_password}}"
+        priv: "{{mysql_db}}.*:ALL"
         state: present
         login_user: root
-        login_password: "{{ mysql_root_password }}"
+        login_password: "{{mysql_root_password}}"
 
 
   # WordPress Configuration
     - name: Download and unpack latest WordPress
       unarchive:
         src: https://wordpress.org/latest.tar.gz
-        dest: "/var/www/{{ http_host }}"
+        dest: "/var/www/{{http_host}}"
         remote_src: yes
-        creates: "/var/www/{{ http_host }}/wordpress"
+        creates: "/var/www/{{http_host}}/wordpress"
       tags: [ wordpress ]       
     
     - name: Set up Apache VirtualHost
       template:
         src: "apache.conf.j2"
-        dest: "/etc/apache2/sites-available/{{ http_conf }}"
+        dest: "/etc/apache2/sites-available/{{http_conf}}"
       notify: Restart Apache
 
     - name: Download wordpress 
       unarchive:
         src: https://wordpress.org/latest.tar.gz
-        dest: "/var/www/{{ http_host }}"
+        dest: "/var/www/{{http_host}}"
         remote_src: yes
-        creates: "/var/www/{{ http_host }}/wordpress"
+        creates: "/var/www/{{http_host}}/wordpress"
  
     - name: Set ownership
       file:
-        path: "/var/www/{{ http_host }}"
+        path: "/var/www/{{http_host}}"
         state: directory
         recurse: yes
         owner: www-data
         group: www-data
 
     - name: Set Directory permissons
-      shell: "/usr/bin/find /var/www/{{ http_host }}/wordpress/ -type d -exec chmod 2775 {} \\;"
+      shell: "/usr/bin/find /var/www/{{http_host}}/wordpress/ -type d -exec chmod 2775 {} \\;"
 
     - name: Set File permissons
-      shell: "/usr/bin/find /var/www/{{ http_host }}/wordpress/ -type f -exec chmod 0664 {} \\;"
+      shell: "/usr/bin/find /var/www/{{http_host}}/wordpress/ -type f -exec chmod 0664 {} \\;"
    
     - name: Makesure Apache is started
       service:
@@ -104,7 +112,7 @@
     - name: Set up wp-config
       template:
         src: "wp-config.php.j2"
-        dest: "/var/www/{{ http_host }}/wordpress/wp-config.php"
+        dest: "/var/www/{{http_host}}/wordpress/wp-config.php"
       notify: Restart Apache
 
   handlers:
