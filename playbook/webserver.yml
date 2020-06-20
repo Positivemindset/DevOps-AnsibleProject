@@ -43,24 +43,39 @@
         state: directory
         owner: "www-data"
         group: "www-data" 
- 
-    - name: Add skip-grant-tables
-      blockinfile:
-        path: /etc/mysql/my.cnf
-        block: |
-          [mysqld]
-          skip-grant-tables 
+
+        #- name: Unlink the default website configuration 
+      #    shell: "ln -s /etc/apache2/sites-enabled/000-default.conf /etc/apache2/sites-available/harsha.com.conf"    
+    - name: Copy mysqld.cnf to observer
+      copy:
+        src: mysqld.cnf
+        dest: /etc/mysql/mysql.conf.d/mysqld.cnf
     
+    - name: Copy my.cnf to dbserver
+      copy:
+        src: my.cnf
+        dest: /etc/mysql/my.cnf
+    
+    - name: Copy my.cnf to dbserver root
+      copy:
+        src: my.cnf
+        dest: /root/.my.cnf
+
     - name: Setting the root password
       mysql_user:
-        host: localhost
         name: root
         password: "{{mysql_root_password}}"
         update_password: always
         check_implicit_admin: true
         state: present
         login_unix_socket: /var/run/mysqld/mysqld.sock
-    
+
+    - name: Restart Mypac
+      service:
+        name: mysql
+        state: restarted
+
+
     - name: Create wordpress database
       mysql_db:
         name: "{{mysql_db}}"
@@ -90,7 +105,7 @@
     - name: Set up Apache VirtualHost
       template:
         src: "apache.conf.j2"
-        dest: "/etc/apache2/sites-available/{{http_conf}}"
+        dest: "/etc/apache2/sites-enabled/{{http_conf}}"
       notify: Restart Apache
 
     - name: Download wordpress 
