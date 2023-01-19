@@ -1,4 +1,4 @@
-# DevOps-AnsibleProject1
+# DevOps-Ansible
 
 Sample project to create a wordpress using ansible
 Note: I have not used roles for this project and i will extend in coming days 
